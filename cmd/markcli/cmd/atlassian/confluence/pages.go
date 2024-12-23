@@ -20,8 +20,8 @@ Common Flags:
 
 Examples:
   # Search for pages
-  markcli atlassian confluence pages search -q "deployment process"
-  markcli atlassian confluence pages search -q "api docs" -s TEAM --limit 5
+  markcli atlassian confluence pages search -t "deployment process"
+  markcli atlassian confluence pages search -t "api docs" -s TEAM --limit 5
 
   # Get page content
   markcli atlassian confluence pages get --id 123456`,

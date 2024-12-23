@@ -25,14 +25,14 @@ Common Flags:
 
 Examples:
   # Search across all content
-  markcli atlassian search -q "deployment process"
+  markcli atlassian search -t "deployment process"
 
   # Work with Confluence
-  markcli atlassian confluence pages search -q "api docs"
+  markcli atlassian confluence pages search -t "api docs"
   markcli atlassian confluence pages get --id 123456
 
   # Work with Jira
-  markcli atlassian jira issues search -q "deployment"
+  markcli atlassian jira issues search -t "deployment"
   markcli atlassian jira issues get --id PROJ-123`,
 }
 

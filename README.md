@@ -179,7 +179,7 @@ You can also directly edit the `config.json` file. Example:
 
   **Flags:**
 
-  - `-q, --query <string>`: Search query (required).
+  - `-t, --text <string>`: Search text (required).
   - `-l, --limit <int>`: Number of results per page (default: 10).
   - `-p, --page <int>`: Page number (default: 1).
   - `--site <string>`: Atlassian site to use (defaults to the default site).
@@ -187,8 +187,8 @@ You can also directly edit the `config.json` file. Example:
   **Example:**
 
   ```bash
-  markcli atlassian search -q "meeting notes" -l 5
-  markcli atlassian search -q "API documentation" -l 10 -p 2 --site my_site
+  markcli atlassian search -t "meeting notes" -l 5
+  markcli atlassian search -t "API documentation" -l 10 -p 2 --site my_site
   ```
 
 #### Confluence Commands
@@ -204,7 +204,7 @@ You can also directly edit the `config.json` file. Example:
 
   **Flags:**
 
-  - `-q, --query <string>`: Search query (required).
+  - `-t, --text <string>`: Search text (required).
   - `-s, --space <string>`: Space key to search in.
   - `-l, --limit <int>`: Number of results per page (default: 10).
   - `-p, --page <int>`: Page number (default: 1).
@@ -236,7 +236,7 @@ You can also directly edit the `config.json` file. Example:
 
   **Flags:**
 
-  - `-q, --query <string>`: Search query (required).
+  - `-t, --text <string>`: Search text (required).
   - `-l, --limit <int>`: Number of results per page (default: 10).
   - `-p, --page <int>`: Page number (default: 1).
   - `-r, --project <string>`: Project key to filter by.
@@ -266,7 +266,7 @@ You can also directly edit the `config.json` file. Example:
 - **Pagination:**
 
   ```bash
-  markcli atlassian jira issues search -q "bug" -l 20 -p 2
+  markcli atlassian jira issues search -t "bug" -l 20 -p 2
   ```
 
 - **Debug Mode:**

@@ -19,8 +19,8 @@ Common Flags:
 
 Examples:
   # Search for issues
-  markcli atlassian jira issues search -q "deployment process"
-  markcli atlassian jira issues search -q "bug" -r SHOP --limit 5
+  markcli atlassian jira issues search -t "deployment process"
+  markcli atlassian jira issues search -t "bug" -r SHOP --limit 5
 
   # Get issue details
   markcli atlassian jira issues get --id PROJ-123`,

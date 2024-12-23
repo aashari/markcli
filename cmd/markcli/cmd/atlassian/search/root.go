@@ -26,31 +26,31 @@ This command performs a combined search across both platforms:
 Common Flags:
   --site: Specify which Atlassian site to use (optional)
   --debug: Enable debug mode for detailed logging
-  -q, --query: Search query (required)
+  -t, --text: Search text (required)
   -l, --limit: Number of results per page (default: 10)
   -p, --page: Page number (default: 1)
 
 Examples:
   # Basic text search across all content
-  markcli atlassian search -q "deployment process"
+  markcli atlassian search -t "deployment process"
 
   # Search with pagination
-  markcli atlassian search -q "aws" -l 5 -p 2
+  markcli atlassian search -t "aws" -l 5 -p 2
 
   # Search in a specific site
-  markcli atlassian search -q "security" --site mysite
+  markcli atlassian search -t "security" --site mysite
 
   # Search with custom result limit
-  markcli atlassian search -q "api documentation" -l 20`,
+  markcli atlassian search -t "api documentation" -l 20`,
 	RunE: search,
 }
 
 func init() {
-	Cmd.Flags().StringP("query", "q", "", "Search query")
+	Cmd.Flags().StringP("text", "t", "", "Search text")
 	Cmd.Flags().IntP("limit", "l", 10, "Number of results per page")
 	Cmd.Flags().IntP("page", "p", 1, "Page number")
 	Cmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
-	Cmd.MarkFlagRequired("query")
+	Cmd.MarkFlagRequired("text")
 }
 
 type searchResult struct {
@@ -60,7 +60,7 @@ type searchResult struct {
 }
 
 func search(cmd *cobra.Command, args []string) error {
-	query, _ := cmd.Flags().GetString("query")
+	text, _ := cmd.Flags().GetString("text")
 	limit, _ := cmd.Flags().GetInt("limit")
 	page, _ := cmd.Flags().GetInt("page")
 	site, _ := cmd.Flags().GetString("site")
@@ -84,7 +84,7 @@ func search(cmd *cobra.Command, args []string) error {
 	go func() {
 		defer wg.Done()
 		searchOpts := types.AtlassianConfluenceSearchOptions{
-			Query:   query,
+			Query:   text,
 			StartAt: startAt,
 			Limit:   limit,
 		}
@@ -95,7 +95,7 @@ func search(cmd *cobra.Command, args []string) error {
 	// Search Jira issues
 	go func() {
 		defer wg.Done()
-		jql := fmt.Sprintf("text ~ \"%s\"", query)
+		jql := fmt.Sprintf("text ~ \"%s\"", text)
 		searchOpts := types.AtlassianJiraSearchOptions{
 			Query:   jql,
 			StartAt: startAt,

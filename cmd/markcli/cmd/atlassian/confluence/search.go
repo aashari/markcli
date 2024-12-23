@@ -20,28 +20,28 @@ var searchCmd = &cobra.Command{
 	
 Examples:
   # Basic text search
-  markcli atlassian confluence pages search -q "deployment process"
+  markcli atlassian confluence pages search -t "deployment process"
 
   # Search in a specific space
-  markcli atlassian confluence pages search -q "deployment process" -s TEAM
+  markcli atlassian confluence pages search -t "deployment process" -s TEAM
 
   # Search with pagination
-  markcli atlassian confluence pages search -q "deployment process" --limit 20 --page 2`,
+  markcli atlassian confluence pages search -t "deployment process" --limit 20 --page 2`,
 	RunE: search,
 }
 
 func init() {
-	searchCmd.Flags().StringP("query", "q", "", "Search query")
+	searchCmd.Flags().StringP("text", "t", "", "Search text")
 	searchCmd.Flags().StringP("space", "s", "", "Space key to search in (e.g., TEAM)")
 	searchCmd.Flags().IntP("limit", "l", 10, "Number of results per page")
 	searchCmd.Flags().IntP("page", "p", 1, "Page number")
 	searchCmd.Flags().StringP("site", "", "", "Atlassian site to use (defaults to the default site)")
-	searchCmd.MarkFlagRequired("query")
+	searchCmd.MarkFlagRequired("text")
 	pagesCmd.AddCommand(searchCmd)
 }
 
 func search(cmd *cobra.Command, args []string) error {
-	query, _ := cmd.Flags().GetString("query")
+	text, _ := cmd.Flags().GetString("text")
 	space, _ := cmd.Flags().GetString("space")
 	limit, _ := cmd.Flags().GetInt("limit")
 	page, _ := cmd.Flags().GetInt("page")
@@ -59,7 +59,7 @@ func search(cmd *cobra.Command, args []string) error {
 
 	// Perform search with pagination
 	searchOpts := types.AtlassianConfluenceSearchOptions{
-		Query:    query,
+		Query:    text,
 		SpaceKey: space,
 		StartAt:  startAt,
 		Limit:    limit,

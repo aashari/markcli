@@ -20,19 +20,19 @@ var searchCmd = &cobra.Command{
 	
 Examples:
   # Search for content
-  markcli atlassian search -q "AWS Security"
+  markcli atlassian search -t "AWS Security"
 
   # Search with a limit
-  markcli atlassian search -q "AWS Security" --limit 5
+  markcli atlassian search -t "AWS Security" --limit 5
 
   # Search in Confluence only
-  markcli atlassian search -q "AWS Security" --confluence-only
+  markcli atlassian search -t "AWS Security" --confluence-only
 
   # Search in Jira only
-  markcli atlassian search -q "AWS Security" --jira-only`,
+  markcli atlassian search -t "AWS Security" --jira-only`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		siteName, _ := cmd.Flags().GetString("site")
-		query, _ := cmd.Flags().GetString("query")
+		text, _ := cmd.Flags().GetString("text")
 		limit, _ := cmd.Flags().GetInt("limit")
 		confluenceOnly, _ := cmd.Flags().GetBool("confluence-only")
 		jiraOnly, _ := cmd.Flags().GetBool("jira-only")
@@ -50,7 +50,7 @@ Examples:
 		var confluenceResults []types.AtlassianConfluenceContentResult
 		if !jiraOnly {
 			results, err := client.AtlassianConfluenceSearchPages(types.AtlassianConfluenceSearchOptions{
-				Query: query,
+				Query: text,
 				Limit: limit,
 			})
 			if err != nil {
@@ -76,7 +76,7 @@ Examples:
 		var jiraResults []types.AtlassianJiraIssue
 		if !confluenceOnly {
 			results, err := client.AtlassianJiraSearchIssues(types.AtlassianJiraSearchOptions{
-				Query: fmt.Sprintf("text ~ \"%s\"", query),
+				Query: fmt.Sprintf("text ~ \"%s\"", text),
 				Limit: limit,
 			})
 			if err != nil {
@@ -127,10 +127,10 @@ Examples:
 
 func init() {
 	RootCmd.AddCommand(searchCmd)
-	searchCmd.Flags().StringP("query", "q", "", "Search query")
+	searchCmd.Flags().StringP("text", "t", "", "Search text")
 	searchCmd.Flags().IntP("limit", "l", 10, "Maximum number of results to return")
 	searchCmd.Flags().Bool("confluence-only", false, "Search in Confluence only")
 	searchCmd.Flags().Bool("jira-only", false, "Search in Jira only")
 	searchCmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
-	searchCmd.MarkFlagRequired("query")
+	searchCmd.MarkFlagRequired("text")
 }

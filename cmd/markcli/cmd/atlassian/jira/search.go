@@ -24,17 +24,17 @@ You can filter results to a specific project using the -r flag.
 	
 Examples:
   # Basic text search
-  markcli atlassian jira issues search -q "deployment process"
+  markcli atlassian jira issues search -t "deployment process"
 
   # Search in a specific project
-  markcli atlassian jira issues search -q "deployment process" -r SHOP
+  markcli atlassian jira issues search -t "deployment process" -r SHOP
 
   # Search with pagination
-  markcli atlassian jira issues search -q "deployment process" --limit 20 --page 2`,
+  markcli atlassian jira issues search -t "deployment process" --limit 20 --page 2`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		query, _ := cmd.Flags().GetString("query")
-		if query == "" {
-			return fmt.Errorf("search query is required")
+		text, _ := cmd.Flags().GetString("text")
+		if text == "" {
+			return fmt.Errorf("search text is required")
 		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -55,7 +55,7 @@ Examples:
 		client := atlassian.NewClient(cfg.BaseURL, cfg.Email, cfg.Token)
 
 		// Build JQL query
-		jql := fmt.Sprintf("text ~ \"%s\"", query)
+		jql := fmt.Sprintf("text ~ \"%s\"", text)
 		if projectKey != "" {
 			jql = fmt.Sprintf("project = %s AND %s", projectKey, jql)
 		}
@@ -89,7 +89,7 @@ Examples:
 
 		// Handle no results
 		if len(results.Issues) == 0 {
-			logging.LogDebug("No issues found for query: %s", query)
+			logging.LogDebug("No issues found for text: %s", text)
 			rendering.PrintMarkdown("No issues found.")
 			return nil
 		}
@@ -113,10 +113,10 @@ Examples:
 
 func init() {
 	issuesCmd.AddCommand(searchCmd)
-	searchCmd.Flags().StringP("query", "q", "", "Search query")
+	searchCmd.Flags().StringP("text", "t", "", "Search text")
 	searchCmd.Flags().StringP("project", "r", "", "Project key to search in (e.g., SHOP)")
 	searchCmd.Flags().IntP("limit", "l", 10, "Number of results per page")
 	searchCmd.Flags().IntP("page", "p", 1, "Page number")
 	searchCmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
-	searchCmd.MarkFlagRequired("query")
+	searchCmd.MarkFlagRequired("text")
 }

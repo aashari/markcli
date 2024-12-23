@@ -27,7 +27,7 @@ Examples:
 
   # Search pages in a specific space
   markcli atlassian confluence pages search \
-    --query "aws tag standard" \
+    --text "aws tag standard" \
     --space "TEAM" \
     --limit 20
 
