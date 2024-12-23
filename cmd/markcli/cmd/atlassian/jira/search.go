@@ -6,6 +6,7 @@ import (
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
 	"markcli/internal/logging"
+	"markcli/internal/rendering"
 	types "markcli/internal/types/atlassian"
 	"markcli/internal/util"
 	"net/http"
@@ -89,7 +90,7 @@ Examples:
 		// Handle no results
 		if len(results.Issues) == 0 {
 			logging.LogDebug("No issues found for query: %s", query)
-			fmt.Println("No issues found.")
+			rendering.PrintMarkdown("No issues found.")
 			return nil
 		}
 
@@ -104,7 +105,8 @@ Examples:
 			results.Total,
 		)
 
-		fmt.Print(output)
+		// Print the formatted output using Glamour
+		rendering.PrintMarkdown(output)
 		return nil
 	},
 }

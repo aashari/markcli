@@ -7,6 +7,7 @@ import (
 	"markcli/internal/api/atlassian"
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
+	"markcli/internal/rendering"
 	types "markcli/internal/types/atlassian"
 
 	"github.com/spf13/cobra"
@@ -160,7 +161,8 @@ func search(cmd *cobra.Command, args []string) error {
 		)
 	}
 
-	fmt.Print(output)
+	// Print the formatted output using Glamour
+	rendering.PrintMarkdown(output)
 	return nil
 }
 

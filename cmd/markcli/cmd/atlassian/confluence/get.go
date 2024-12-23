@@ -6,6 +6,7 @@ import (
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
 	"markcli/internal/logging"
+	"markcli/internal/rendering"
 
 	"github.com/spf13/cobra"
 )
@@ -53,8 +54,8 @@ Example:
 		formatter := formatting.AtlassianConfluenceCreatePageDetailsFormatter(*pageDetails)
 		output := formatter.AtlassianConfluenceFormatPageDetailsAsMarkdown()
 
-		// Print the formatted output
-		fmt.Print(output)
+		// Print the formatted output using Glamour
+		rendering.PrintMarkdown(output)
 		return nil
 	},
 }

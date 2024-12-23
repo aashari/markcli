@@ -6,6 +6,7 @@ import (
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
 	"markcli/internal/logging"
+	"markcli/internal/rendering"
 	types "markcli/internal/types/atlassian"
 	"net/http"
 
@@ -48,20 +49,20 @@ Examples:
 				case http.StatusUnauthorized:
 					return fmt.Errorf("authentication failed: please check your API token and email")
 				case http.StatusForbidden:
-					return fmt.Errorf("access denied: you don't have permission to list projects")
+					return fmt.Errorf("access denied: you don't have permission to view projects")
 				default:
 					if apiErr.Message != "" {
 						return fmt.Errorf("Jira API error: %s", apiErr.Message)
 					}
 				}
 			}
-			return fmt.Errorf("failed to list projects: %w", err)
+			return fmt.Errorf("failed to get projects: %w", err)
 		}
 
 		// Handle no results
 		if len(projects) == 0 {
 			logging.LogDebug("No projects found")
-			fmt.Println("No projects found.")
+			rendering.PrintMarkdown("No projects found.")
 			return nil
 		}
 
@@ -69,7 +70,8 @@ Examples:
 		formatter := formatting.AtlassianJiraCreateProjectTableFormatter(projects, sortBy)
 		output := formatter.AtlassianJiraFormatProjectsAsMarkdown()
 
-		fmt.Print(output)
+		// Print the formatted output using Glamour
+		rendering.PrintMarkdown(output)
 		return nil
 	},
 }

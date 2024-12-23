@@ -6,6 +6,7 @@ import (
 	"markcli/internal/api/atlassian"
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
+	"markcli/internal/rendering"
 	types "markcli/internal/types/atlassian"
 	"markcli/internal/util"
 
@@ -74,16 +75,13 @@ func search(cmd *cobra.Command, args []string) error {
 	output := formatter.AtlassianConfluenceFormatSearchResultsAsMarkdown()
 
 	// Add pagination info
-	totalPages := (results.Size + limit - 1) / limit
-	output = fmt.Sprintf("%s\n\nShowing results %d-%d of %d (Page %d of %d)\n",
-		output,
+	output += fmt.Sprintf("\nShowing %d-%d of %d results\n",
 		startAt+1,
-		util.Min(startAt+results.Size, results.TotalSize),
+		util.Min(startAt+len(results.Results), results.TotalSize),
 		results.TotalSize,
-		page,
-		totalPages,
 	)
 
-	fmt.Print(output)
+	// Print the formatted output using Glamour
+	rendering.PrintMarkdown(output)
 	return nil
 }

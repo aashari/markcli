@@ -6,6 +6,7 @@ import (
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
 	"markcli/internal/logging"
+	"markcli/internal/rendering"
 	types "markcli/internal/types/atlassian"
 	"net/http"
 
@@ -71,8 +72,8 @@ Example:
 		}
 		output := formatter.AtlassianJiraFormatIssueDetailsAsMarkdown()
 
-		// Print the formatted output
-		fmt.Print(output)
+		// Print the formatted output using Glamour
+		rendering.PrintMarkdown(output)
 		return nil
 	},
 }
