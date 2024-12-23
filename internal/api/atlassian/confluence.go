@@ -14,9 +14,26 @@ import (
 // AtlassianConfluenceSearchPages searches for pages in Confluence
 func (c *Client) AtlassianConfluenceSearchPages(opts atlassian.AtlassianConfluenceSearchOptions) (*atlassian.AtlassianConfluenceSearchResponse, error) {
 	// Build CQL query
-	cql := fmt.Sprintf("type=page AND text ~ \"%s\"", opts.Query)
+	cql := "type=page"
+
+	if opts.Query != "" {
+		cql = fmt.Sprintf("%s AND text ~ \"%s\"", cql, opts.Query)
+	}
+
 	if opts.SpaceKey != "" {
 		cql = fmt.Sprintf("%s AND space=\"%s\"", cql, opts.SpaceKey)
+	}
+
+	if opts.SortBy != "" {
+		sortBy := "lastModified"
+		if opts.SortBy != "" {
+			sortBy = opts.SortBy
+		}
+		sortOrder := "desc"
+		if opts.SortOrder != "" {
+			sortOrder = opts.SortOrder
+		}
+		cql = fmt.Sprintf("%s ORDER BY %s %s", cql, sortBy, sortOrder)
 	}
 
 	// Build query parameters

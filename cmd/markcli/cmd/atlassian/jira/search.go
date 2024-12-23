@@ -115,7 +115,7 @@ func init() {
 	issuesCmd.AddCommand(searchCmd)
 	searchCmd.Flags().StringP("text", "t", "", "Search text")
 	searchCmd.Flags().StringP("project", "r", "", "Project key to search in (e.g., SHOP)")
-	searchCmd.Flags().IntP("limit", "l", 10, "Number of results per page")
+	searchCmd.Flags().IntP("limit", "l", 100, "Number of results per page")
 	searchCmd.Flags().IntP("page", "p", 1, "Page number")
 	searchCmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
 	searchCmd.MarkFlagRequired("text")

@@ -27,7 +27,7 @@ Common Flags:
   --site: Specify which Atlassian site to use (optional)
   --debug: Enable debug mode for detailed logging
   -t, --text: Search text (required)
-  -l, --limit: Number of results per page (default: 10)
+  -l, --limit: Number of results per page (default: 100)
   -p, --page: Page number (default: 1)
 
 Examples:
@@ -47,7 +47,7 @@ Examples:
 
 func init() {
 	Cmd.Flags().StringP("text", "t", "", "Search text")
-	Cmd.Flags().IntP("limit", "l", 10, "Number of results per page")
+	Cmd.Flags().IntP("limit", "l", 100, "Number of results per page")
 	Cmd.Flags().IntP("page", "p", 1, "Page number")
 	Cmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
 	Cmd.MarkFlagRequired("text")

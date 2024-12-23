@@ -180,7 +180,7 @@ You can also directly edit the `config.json` file. Example:
   **Flags:**
 
   - `-t, --text <string>`: Search text (required).
-  - `-l, --limit <int>`: Number of results per page (default: 10).
+  - `-l, --limit <int>`: Number of results per page (default: 100).
   - `-p, --page <int>`: Page number (default: 1).
   - `--site <string>`: Atlassian site to use (defaults to the default site).
 
@@ -200,15 +200,25 @@ You can also directly edit the `config.json` file. Example:
   - `-a, --all`: Show all spaces, including personal and archived ones.
   - `--site <string>`: Atlassian site to use (defaults to the default site).
 
-- **`markcli atlassian confluence pages search [flags]`**: Search Confluence pages.
+- **`markcli atlassian confluence pages [flags]`**: List and search Confluence pages.
 
   **Flags:**
 
-  - `-t, --text <string>`: Search text (required).
-  - `-s, --space <string>`: Space key to search in.
-  - `-l, --limit <int>`: Number of results per page (default: 10).
+  - `--space <string>`: Space key to list pages from (e.g., "TEAM").
+  - `-t, --text <string>`: Search text (for search subcommand).
+  - `-l, --limit <int>`: Number of results per page (default: 100).
   - `-p, --page <int>`: Page number (default: 1).
   - `--site <string>`: Atlassian site to use (defaults to the default site).
+
+  **Examples:**
+
+  ```bash
+  # List pages from a space
+  markcli atlassian confluence pages --space TEAM
+
+  # Search pages with text
+  markcli atlassian confluence pages search -t "deployment" -l 20
+  ```
 
 - **`markcli atlassian confluence pages get [flags]`**: Get a specific Confluence page.
 
@@ -232,15 +242,27 @@ You can also directly edit the `config.json` file. Example:
   - `--site <string>`: Atlassian site to use (defaults to the default site).
   - `--sort <string>`: Sort by `key`, `name`, `type`, or `style` (default: `key`).
 
-- **`markcli atlassian jira issues search [flags]`**: Search Jira issues.
+- **`markcli atlassian jira issues [flags]`**: List and search Jira issues.
 
   **Flags:**
 
-  - `-t, --text <string>`: Search text (required).
-  - `-l, --limit <int>`: Number of results per page (default: 10).
+  - `--project <string>`: Project key to list issues from (e.g., "SHOP").
+  - `-t, --text <string>`: Search text (for search subcommand).
+  - `-l, --limit <int>`: Number of results per page (default: 100).
   - `-p, --page <int>`: Page number (default: 1).
-  - `-r, --project <string>`: Project key to filter by.
   - `--site <string>`: Atlassian site to use (defaults to the default site).
+
+  **Note:** Issues are ordered by last updated date in descending order, and statuses "Abandoned" and "Done" are excluded by default.
+
+  **Examples:**
+
+  ```bash
+  # List issues from a project
+  markcli atlassian jira issues --project SHOP
+
+  # Search issues with text
+  markcli atlassian jira issues search -t "deployment" -l 20
+  ```
 
 - **`markcli atlassian jira issues get [flags]`**: Get a specific Jira issue.
 

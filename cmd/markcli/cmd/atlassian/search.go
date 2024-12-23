@@ -128,7 +128,7 @@ Examples:
 func init() {
 	RootCmd.AddCommand(searchCmd)
 	searchCmd.Flags().StringP("text", "t", "", "Search text")
-	searchCmd.Flags().IntP("limit", "l", 10, "Maximum number of results to return")
+	searchCmd.Flags().IntP("limit", "l", 100, "Maximum number of results to return")
 	searchCmd.Flags().Bool("confluence-only", false, "Search in Confluence only")
 	searchCmd.Flags().Bool("jira-only", false, "Search in Jira only")
 	searchCmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
