@@ -40,7 +40,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(atlassian.Cmd)
+	rootCmd.AddCommand(atlassian.RootCmd)
 	rootCmd.AddCommand(config.GetCommand())
 	rootCmd.PersistentFlags().Bool("debug", false, "enable debug mode")
 }

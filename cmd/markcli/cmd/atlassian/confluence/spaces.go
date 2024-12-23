@@ -5,7 +5,7 @@ import (
 
 	"markcli/internal/api/atlassian"
 	"markcli/internal/config"
-	"markcli/internal/markdown"
+	formatting "markcli/internal/formatting/atlassian"
 
 	"github.com/spf13/cobra"
 )
@@ -35,13 +35,13 @@ func listSpaces(cmd *cobra.Command, args []string) error {
 
 	client := atlassian.NewClient(cfg.BaseURL, cfg.Email, cfg.Token)
 
-	spaces, err := client.ListSpaces(all)
+	spaces, err := client.AtlassianConfluenceListSpaces(all)
 	if err != nil {
 		return fmt.Errorf("failed to list spaces: %w", err)
 	}
 
-	formatter := markdown.NewSpaceTableFormatter(spaces)
-	output := formatter.RawMarkdown()
+	formatter := formatting.AtlassianConfluenceCreateSpaceTableFormatter(spaces)
+	output := formatter.AtlassianConfluenceFormatSpacesAsMarkdown()
 	fmt.Print(output)
 	return nil
 }

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"markcli/internal/api/atlassian"
 	"markcli/internal/config"
-	"markcli/internal/markdown"
+	formatting "markcli/internal/formatting/atlassian"
+	"markcli/internal/logging"
+	types "markcli/internal/types/atlassian"
 	"net/http"
 
 	"github.com/spf13/cobra"
@@ -12,88 +14,108 @@ import (
 
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "Search Jira issues",
-	Long:  "Search Jira issues using text query with optional project filtering",
-	RunE:  searchIssues,
+	Short: "Search for Jira issues",
+	Long: `Search for Jira issues using text search.
+
+The search will look for the given text in issue summaries, descriptions, and comments.
+You can filter results to a specific project using the -r flag.
+	
+Examples:
+  # Basic text search
+  markcli atlassian jira issues search -q "deployment process"
+
+  # Search in a specific project
+  markcli atlassian jira issues search -q "deployment process" -r SHOP
+
+  # Search with pagination
+  markcli atlassian jira issues search -q "deployment process" --limit 20 --page 2`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		query, _ := cmd.Flags().GetString("query")
+		if query == "" {
+			return fmt.Errorf("search query is required")
+		}
+
+		limit, _ := cmd.Flags().GetInt("limit")
+		page, _ := cmd.Flags().GetInt("page")
+		siteName, _ := cmd.Flags().GetString("site")
+		projectKey, _ := cmd.Flags().GetString("project")
+
+		// Calculate start position for pagination
+		startAt := (page - 1) * limit
+
+		// Get Atlassian configuration
+		cfg, err := config.GetAtlassianConfig(siteName)
+		if err != nil {
+			return fmt.Errorf("failed to get Atlassian configuration: %w", err)
+		}
+
+		// Create client
+		client := atlassian.NewClient(cfg.BaseURL, cfg.Email, cfg.Token)
+
+		// Build JQL query
+		jql := fmt.Sprintf("text ~ \"%s\"", query)
+		if projectKey != "" {
+			jql = fmt.Sprintf("project = %s AND %s", projectKey, jql)
+		}
+		jql += " ORDER BY updated DESC"
+
+		// Search issues
+		searchOpts := types.AtlassianJiraSearchOptions{
+			Query:   jql,
+			StartAt: startAt,
+			Limit:   limit,
+		}
+		results, err := client.AtlassianJiraSearchIssues(searchOpts)
+		if err != nil {
+			// Check for specific API errors
+			if apiErr, ok := err.(*types.AtlassianJiraError); ok {
+				switch apiErr.StatusCode {
+				case http.StatusUnauthorized:
+					return fmt.Errorf("authentication failed: please check your API token and email")
+				case http.StatusForbidden:
+					return fmt.Errorf("access denied: you don't have permission to search issues")
+				case http.StatusBadRequest:
+					return fmt.Errorf("invalid JQL query: %s", apiErr.Message)
+				default:
+					if apiErr.Message != "" {
+						return fmt.Errorf("Jira API error: %s", apiErr.Message)
+					}
+				}
+			}
+			return fmt.Errorf("failed to search issues: %w", err)
+		}
+
+		// Handle no results
+		if len(results.Issues) == 0 {
+			logging.LogDebug("No issues found for query: %s", query)
+			fmt.Println("No issues found.")
+			return nil
+		}
+
+		// Format results
+		formatter := formatting.AtlassianJiraCreateSearchResultsFormatter(results.Issues)
+		output := formatter.AtlassianJiraFormatSearchResultsAsMarkdown()
+
+		// Add pagination info
+		output += fmt.Sprintf("\nShowing %d-%d of %d issues\n",
+			startAt+1,
+			min(startAt+len(results.Issues), results.Total),
+			results.Total,
+		)
+
+		fmt.Print(output)
+		return nil
+	},
 }
 
 func init() {
 	issuesCmd.AddCommand(searchCmd)
-	searchCmd.Flags().StringP("query", "q", "", "Search query (required)")
+	searchCmd.Flags().StringP("query", "q", "", "Search query")
+	searchCmd.Flags().StringP("project", "r", "", "Project key to search in (e.g., SHOP)")
 	searchCmd.Flags().IntP("limit", "l", 10, "Number of results per page")
 	searchCmd.Flags().IntP("page", "p", 1, "Page number")
-	searchCmd.Flags().StringP("project", "r", "", "Project key to filter issues")
-	searchCmd.Flags().StringP("site", "", "", "Atlassian site to use (defaults to the default site)")
+	searchCmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
 	searchCmd.MarkFlagRequired("query")
-}
-
-func searchIssues(cmd *cobra.Command, args []string) error {
-	query, _ := cmd.Flags().GetString("query")
-	limit, _ := cmd.Flags().GetInt("limit")
-	page, _ := cmd.Flags().GetInt("page")
-	project, _ := cmd.Flags().GetString("project")
-	site, _ := cmd.Flags().GetString("site")
-
-	cfg, err := config.GetAtlassianConfig(site)
-	if err != nil {
-		return fmt.Errorf("failed to get Atlassian configuration: %w", err)
-	}
-
-	client := atlassian.NewClient(cfg.BaseURL, cfg.Email, cfg.Token)
-
-	// Calculate start position for pagination
-	startAt := (page - 1) * limit
-
-	// Construct JQL query
-	jql := fmt.Sprintf("text ~ \"%s\"", query)
-	if project != "" {
-		jql = fmt.Sprintf("project = %s AND %s", project, jql)
-	}
-
-	// Perform search with pagination
-	searchOpts := atlassian.JiraSearchOptions{
-		Query:   jql,
-		StartAt: startAt,
-		Limit:   limit,
-	}
-
-	results, err := client.SearchIssues(searchOpts)
-	if err != nil {
-		// Check for specific HTTP errors
-		if apiErr, ok := err.(*atlassian.APIError); ok {
-			switch apiErr.StatusCode {
-			case http.StatusUnauthorized:
-				return fmt.Errorf("authentication failed: please check your API token and email")
-			case http.StatusForbidden:
-				return fmt.Errorf("access denied: you don't have permission to search issues")
-			case http.StatusNotFound:
-				return fmt.Errorf("Jira API endpoint not found: please check your site URL")
-			case http.StatusBadRequest:
-				return fmt.Errorf("invalid search query: %s", apiErr.Message)
-			default:
-				if apiErr.Message != "" {
-					return fmt.Errorf("Jira API error: %s (status code: %d)", apiErr.Message, apiErr.StatusCode)
-				}
-			}
-		}
-		return fmt.Errorf("failed to search Jira issues: %w", err)
-	}
-
-	formatter := markdown.NewJiraSearchResultsFormatter(results.Issues)
-	output := formatter.RawMarkdown()
-
-	// Add pagination info
-	totalPages := (results.Total + limit - 1) / limit
-	output = fmt.Sprintf("%s\nShowing results %d-%d of %d (Page %d of %d)\n",
-		output,
-		startAt+1,
-		min(startAt+len(results.Issues), results.Total),
-		results.Total,
-		page,
-		totalPages,
-	)
-	fmt.Print(output)
-	return nil
 }
 
 func min(a, b int) int {

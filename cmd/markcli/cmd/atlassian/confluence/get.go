@@ -1,12 +1,11 @@
 package confluence
 
 import (
-	"encoding/json"
 	"fmt"
 	"markcli/internal/api/atlassian"
 	"markcli/internal/config"
+	formatting "markcli/internal/formatting/atlassian"
 	"markcli/internal/logging"
-	"markcli/internal/markdown"
 
 	"github.com/spf13/cobra"
 )
@@ -36,29 +35,23 @@ Example:
 		client := atlassian.NewClient(cfg.BaseURL, cfg.Email, cfg.Token)
 
 		// Get page
-		jsonData, err := client.GetPage(pageID)
+		pageDetails, err := client.AtlassianConfluenceGetPage(pageID)
 		if err != nil {
 			return fmt.Errorf("failed to get page: %w", err)
 		}
 
-		// Parse the JSON response
-		var response markdown.PageDetailsResponse
-		if err := json.Unmarshal(jsonData, &response); err != nil {
-			return fmt.Errorf("failed to parse response: %w", err)
-		}
-
 		// Get footer comments
-		comments, err := client.GetPageFooterComments(pageID)
+		comments, err := client.AtlassianConfluenceGetPageFooterComments(pageID)
 		if err != nil {
 			// Log the error but continue without comments
 			logging.LogDebug("Failed to get footer comments: %v", err)
 		} else {
-			response.Comments = comments
+			pageDetails.Comments = comments
 		}
 
 		// Format the page details
-		formatter := markdown.NewPageDetailsFormatter(response)
-		output := formatter.RawMarkdown()
+		formatter := formatting.AtlassianConfluenceCreatePageDetailsFormatter(*pageDetails)
+		output := formatter.AtlassianConfluenceFormatPageDetailsAsMarkdown()
 
 		// Print the formatted output
 		fmt.Print(output)

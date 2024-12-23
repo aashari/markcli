@@ -1,54 +1,62 @@
-# markcli
+# markcli: Your Markdown CLI Companion for Atlassian
 
-A command-line tool for managing markdown content across different platforms. Currently supports Atlassian Confluence and Jira.
+`markcli` is a powerful command-line interface (CLI) tool designed to streamline your interactions with Atlassian products, specifically Confluence and Jira. It empowers you to manage and access markdown content across these platforms directly from your terminal.
 
-## Support
+## Key Features
 
-Currently markcli supports the following OSes:
-
-* macOS
-  * 64bit (amd64)
-  * Arm (Apple Silicon)
-* Linux
-  * 64bit (amd64)
-  * Arm64
-* Windows
-  * 64bit (amd64)
+- **Cross-Platform Compatibility:** Runs seamlessly on macOS, Linux, and Windows.
+- **Unified Markdown Output:** Consistent markdown formatting across Confluence and Jira.
+- **Atlassian Confluence Integration:**
+  - List, search, and filter Confluence spaces.
+  - Retrieve detailed information and markdown content of Confluence pages.
+  - Search Confluence pages using CQL (Confluence Query Language).
+- **Atlassian Jira Integration:**
+  - List Jira projects and sort results by key, name, type, or style.
+  - Search for Jira issues using text queries and project filters.
+  - Get detailed information and comments for specific Jira issues.
+- **Global Search:** Search across both Confluence pages and Jira issues.
+- **Multiple Site Support:** Easily manage and switch between multiple Atlassian site configurations.
+- **Pagination:** Efficiently handle large datasets with pagination for list and search commands.
+- **Debug Mode:** Enable detailed logging for troubleshooting.
+- **Shell Completion:** Available for Bash, Zsh, Fish, and PowerShell.
 
 ## Installation
 
 ### Binary Download
 
-1. Download the latest version from the [releases page](https://github.com/aashari/markcli/releases) for your platform:
-   - `markcli-linux` for Linux
-   - `markcli-mac` for macOS
-   - `markcli.exe` for Windows
+1.  Download the appropriate binary for your operating system from the [releases page](https://github.com/aashari/markcli/releases).
 
-2. Make it executable (Linux/macOS):
-```bash
-chmod +x ./markcli-*
-```
+    - `markcli-linux` for Linux
+    - `markcli-mac` for macOS
+    - `markcli.exe` for Windows
 
-3. Move to a directory in your `$PATH`:
+2.  **Make the binary executable (Linux/macOS):**
 
-Linux/macOS:
-```bash
-# System-wide installation (requires sudo)
-sudo mv markcli-* /usr/local/bin/markcli
+    ```bash
+    chmod +x ./markcli-*
+    ```
 
-# Or, user-local installation
-mkdir -p ~/.local/bin
-mv markcli-* ~/.local/bin/markcli
-```
+3.  **Move the binary to a directory in your `$PATH`:**
 
-Windows:
-- Rename the downloaded file to `markcli.exe`
-- Move it to a directory in your system's PATH (e.g., `C:\Windows`)
-- Or add its location to your PATH environment variable
+    - **Linux/macOS:**
+
+      ```bash
+      # System-wide installation (requires sudo)
+      sudo mv markcli-* /usr/local/bin/markcli
+
+      # User-local installation
+      mkdir -p ~/.local/bin
+      mv markcli-* ~/.local/bin/markcli
+      ```
+
+    - **Windows:**
+
+      - Rename the downloaded file to `markcli.exe`.
+      - Move it to a directory included in your system's `PATH` environment variable (e.g., `C:\Windows`), or add the directory containing the binary to the `PATH`.
 
 ### Verify Installation
 
-After installation, verify that markcli is properly installed:
+Confirm the installation by running:
 
 ```bash
 markcli --version
@@ -56,235 +64,225 @@ markcli --version
 
 ### Shell Completion
 
-`markcli` provides shell completion support for:
-- bash
-- zsh
-- fish
-- powershell
+`markcli` offers convenient shell completion to speed up your command entry:
 
-### Bash
+#### Bash
 
 ```bash
-# Load completions for current session
+# Load completion for current session
 source <(markcli completion bash)
 
-# Load completions for all sessions
+# Load completion for all sessions
 markcli completion bash > /etc/bash_completion.d/markcli
 ```
 
-### Zsh
+#### Zsh
 
 ```zsh
-# Enable shell completion
+# Enable completion (add to ~/.zshrc and restart terminal)
 echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-# Load completions for current session
+# Load completion for current session
 source <(markcli completion zsh)
 
-# Load completions for all sessions (Linux)
+# Load completion for all sessions (Linux)
 markcli completion zsh > "${fpath[1]}/_markcli"
 
-# Load completions for all sessions (macOS with Homebrew)
+# Load completion for all sessions (macOS with Homebrew)
 markcli completion zsh > $(brew --prefix)/share/zsh/site-functions/_markcli
 ```
 
-### Fish
+#### Fish
 
 ```fish
-# Load completions for current session
+# Load completion for current session
 markcli completion fish | source
 
-# Load completions for all sessions
+# Load completion for all sessions
 markcli completion fish > ~/.config/fish/completions/markcli.fish
 ```
 
-### PowerShell
+#### PowerShell
 
 ```powershell
-# Load completions for current session
+# Load completion for current session
 markcli completion powershell | Out-String | Invoke-Expression
 
-# Load completions for all sessions
+# Load completion for all sessions
 markcli completion powershell > markcli.ps1
 ```
 
-After enabling completion, you can use <TAB> to auto-complete commands, flags, and arguments.
-
 ## Configuration
 
-`markcli` stores its configuration in `~/.config/markcli/config.json`. You can add new configurations using the `config add` command. For example:
+`markcli` stores its configuration data in `~/.config/markcli/config.json`.
+
+### Adding New Configurations
+
+You can add or modify configurations using the `config` command:
 
 ```bash
 markcli config add atlassian
 ```
 
-This will prompt you for your Atlassian site URL or name, email, and API token.
+Follow the prompts to configure a new Atlassian site. You will be asked for:
 
-You can also manually create or edit the `config.json` file directly. A sample configuration would look like this:
+- The Atlassian site URL or name
+- Your email address
+- Your API token
+
+### Manual Configuration
+
+You can also directly edit the `config.json` file. Example:
 
 ```json
 {
   "atlassian": {
-    "sitename": {
-      "site_name": "sitename",
-      "base_url": "https://your-site.atlassian.net",
-      "email": "your-email@example.com",
+    "my_site": {
+      "site_name": "my_site",
+      "base_url": "https://my_site.atlassian.net",
+      "email": "user@example.com",
       "token": "your-api-token"
     }
   },
-  "default_atlassian_site": "sitename"
+   "default_atlassian_site": "my_site"
 }
 ```
+
+**Important:** Do not share this file, as it contains your API token.
 
 ## Command Reference
 
 ### Global Options
-All commands support these global options:
-- `--debug`: Enable debug mode for detailed logging
-- `--help, -h`: Show help for any command
+
+- `--debug`: Enable debug logging.
+- `--help`, `-h`: Display help for any command.
 
 ### Configuration Commands
 
-1. **List Configurations**
-   ```bash
-   markcli config list
-   ```
-   Lists all configured platforms and their settings
+- **`markcli config add <platform>`**: Add a new platform configuration.
+- **`markcli config list`**: List configured platforms and settings.
+- **`markcli config remove <platform> <site-name (optional)>`**: Remove platform configuration.
+
+  - For example `markcli config remove atlassian my_site`
 
 ### Atlassian Commands
 
 #### Site Management
 
-1. **Sites**
-   ```bash
-   # List all configured sites (default action)
-   markcli atlassian sites
+- **`markcli atlassian sites`**: Lists all configured Atlassian sites.
 
-   # Set default site
-   markcli atlassian sites set-default <site-name>
-   ```
-   - Default action: Lists all configured Atlassian sites
-   - Subcommands:
-     - `set-default`: Set the specified site as default
-   - Flags:
-     - `--help, -h`: Show help for sites command
+- **`markcli atlassian sites set-default <site-name>`**: Set the default Atlassian site.
+
+#### Global Search
+
+- **`markcli atlassian search [flags]`**: Search across Confluence and Jira.
+
+  **Flags:**
+
+  - `-q, --query <string>`: Search query (required).
+  - `-l, --limit <int>`: Number of results per page (default: 10).
+  - `-p, --page <int>`: Page number (default: 1).
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
+
+  **Example:**
+
+  ```bash
+  markcli atlassian search -q "meeting notes" -l 5
+  markcli atlassian search -q "API documentation" -l 10 -p 2 --site my_site
+  ```
 
 #### Confluence Commands
 
-1. **List Spaces**
-   ```bash
-   markcli atlassian confluence spaces [flags]
-   ```
-   List all available Confluence spaces
-   - Flags:
-     - `-a, --all`: Show all spaces (including personal and archived)
-     - `--site string`: Atlassian site to use (defaults to the default site)
+- **`markcli atlassian confluence spaces [flags]`**: List Confluence spaces.
 
-2. **Search Pages**
-   ```bash
-   markcli atlassian confluence pages search [flags]
-   ```
-   Search Confluence pages using CQL (Confluence Query Language)
-   - Flags:
-     - `-q, --query string`: Search query (required)
-     - `-s, --space string`: Space key to search in
-     - `-l, --limit int`: Number of results per page (default: 10)
-     - `-p, --page int`: Page number (default: 1)
-     - `--site string`: Atlassian site to use (defaults to the default site)
+  **Flags:**
 
-3. **Get Page Content**
-   ```bash
-   markcli atlassian confluence pages get [flags]
-   ```
-   Get a specific Confluence page by ID using Confluence API v2
-   - Flags:
-     - `--id string`: Page ID to retrieve
-     - `--site string`: Atlassian site to use (defaults to the default site)
+  - `-a, --all`: Show all spaces, including personal and archived ones.
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
 
-   Example:
-   ```bash
-   markcli atlassian confluence pages get --id 123456
-   ```
+- **`markcli atlassian confluence pages search [flags]`**: Search Confluence pages.
+
+  **Flags:**
+
+  - `-q, --query <string>`: Search query (required).
+  - `-s, --space <string>`: Space key to search in.
+  - `-l, --limit <int>`: Number of results per page (default: 10).
+  - `-p, --page <int>`: Page number (default: 1).
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
+
+- **`markcli atlassian confluence pages get [flags]`**: Get a specific Confluence page.
+
+  **Flags:**
+
+  - `--id <string>`: Page ID to retrieve.
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
+
+  **Example:**
+
+  ```bash
+  markcli atlassian confluence pages get --id 123456
+  ```
 
 #### Jira Commands
 
-1. **List Projects**
-   ```bash
-   markcli atlassian jira projects [flags]
-   ```
-   List all available Jira projects
-   - Flags:
-     - `--site string`: Atlassian site to use (defaults to the default site)
-     - `--sort string`: Sort projects by: key, name, type, or style (default: "key")
+- **`markcli atlassian jira projects [flags]`**: List Jira projects.
 
-2. **Search Issues**
-   ```bash
-   markcli atlassian jira issues search [flags]
-   ```
-   Search Jira issues using text query with optional project filtering
-   - Flags:
-     - `-q, --query string`: Search query (required)
-     - `-l, --limit int`: Number of results per page (default: 10)
-     - `-p, --page int`: Page number (default: 1)
-     - `-r, --project string`: Project key to filter issues
-     - `--site string`: Atlassian site to use (defaults to the default site)
+  **Flags:**
 
-3. **Get Issue Details**
-   ```bash
-   markcli atlassian jira issues get [flags]
-   ```
-   Get a specific Jira issue by ID using Jira API v3
-   - Flags:
-     - `--id string`: Issue ID to retrieve
-     - `--site string`: Atlassian site to use (defaults to the default site)
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
+  - `--sort <string>`: Sort by `key`, `name`, `type`, or `style` (default: `key`).
 
-### Common Usage Patterns
+- **`markcli atlassian jira issues search [flags]`**: Search Jira issues.
 
-1. **Using a Specific Site**
-   All Atlassian commands accept the `--site` flag to specify which site configuration to use. If not provided, the default site is used.
-   ```bash
-   markcli atlassian jira projects --site="your-site-name"
-   ```
+  **Flags:**
 
-2. **Pagination**
-   Search commands support pagination with `--limit` and `--page` flags:
-   ```bash
-   markcli atlassian jira issues search -q "high priority" -l 20 -p 2
-   ```
+  - `-q, --query <string>`: Search query (required).
+  - `-l, --limit <int>`: Number of results per page (default: 10).
+  - `-p, --page <int>`: Page number (default: 1).
+  - `-r, --project <string>`: Project key to filter by.
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
 
-3. **Debug Mode**
-   Add `--debug` to any command for detailed logging:
-   ```bash
-   markcli --debug atlassian confluence spaces
-   ```
+- **`markcli atlassian jira issues get [flags]`**: Get a specific Jira issue.
 
-## Features
+  **Flags:**
 
-*   **Atlassian Confluence Support:**
-    *   List Confluence spaces with filtering options
-    *   Search Confluence pages using CQL (Confluence Query Language)
-    *   Get the content of a specific Confluence page by its ID
+  - `--id <string>`: Issue ID to retrieve.
+  - `--site <string>`: Atlassian site to use (defaults to the default site).
 
-*   **Atlassian Jira Support:**
-    *   List Jira projects with sorting options
-    *   Search Jira issues using text queries and project filters
-    *   Get detailed information about specific Jira issues
+  **Example:**
 
-*   **Atlassian Site Management:**
-    *   Manage configurations for multiple Atlassian sites
-    *   Set and use default Atlassian site
-    *   Easy switching between different sites
+  ```bash
+  markcli atlassian jira issues get --id PROJ-123
+  ```
 
-*   **Common Features:**
-    *   Consistent markdown output across all supported platforms
-    *   Support for pagination in list and search operations
-    *   Robust error handling and informative error messages
-    *   Debug logging for troubleshooting
+## Usage Patterns
+
+- **Specifying a Site:**
+
+  ```bash
+  markcli atlassian jira projects --site="your_site_name"
+  ```
+
+- **Pagination:**
+
+  ```bash
+  markcli atlassian jira issues search -q "bug" -l 20 -p 2
+  ```
+
+- **Debug Mode:**
+
+  ```bash
+  markcli --debug atlassian confluence spaces
+  ```
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! To contribute:
+
+1.  Fork the repository.
+2.  Create a new branch for your feature: (`git checkout -b feature/your-feature`).
+3.  Commit your changes: (`git commit -m 'Add your feature'`).
+4.  Push to your branch: (`git push origin feature/your-feature`).
+5.  Create a pull request.
+
+We appreciate your contributions!
