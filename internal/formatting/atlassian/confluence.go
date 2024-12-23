@@ -121,8 +121,7 @@ func (f *AtlassianConfluenceSearchResultsFormatter) AtlassianConfluenceFormatSea
 			description = "(No description available)"
 		}
 
-		description = util.TruncateText(description, 1500)
-		description = AtlassianConfluenceWrapText(description, 100)
+		description = util.TruncateText(description, 1000)
 		md.WriteString(description)
 		md.WriteString("\n")
 	}

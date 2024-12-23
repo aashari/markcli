@@ -136,7 +136,8 @@ func (f *AtlassianJiraSearchResultsFormatter) AtlassianJiraFormatSearchResultsAs
 				Version: issue.Fields.Description.Version,
 			}
 			if desc, err := doc.AtlassianDocumentConvertToMarkdown(); err == nil {
-				desc = util.TruncateText(desc, 300)
+				desc = util.TruncateText(desc, 1000)
+				desc = strings.ReplaceAll(desc, "\n", " ")
 				output.WriteString(desc)
 			}
 			output.WriteString("\n")
