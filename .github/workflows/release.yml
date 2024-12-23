@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     name: Build and Package
@@ -17,48 +21,39 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Run Tests
+        run: go test ./...
+
+      - name: Get Version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Build Executables
         run: |
           chmod +x ./cmd/markcli/build.sh
           ./cmd/markcli/build.sh
+          cd dist
+          # Rename binaries to include version
+          mv markcli-linux markcli-linux-${{ env.VERSION }}
+          mv markcli-mac markcli-mac-${{ env.VERSION }}
+          mv markcli.exe markcli-windows-${{ env.VERSION }}.exe
+          # Generate checksums
+          sha256sum markcli-linux-${{ env.VERSION }} > markcli-linux-${{ env.VERSION }}.sha256
+          sha256sum markcli-mac-${{ env.VERSION }} > markcli-mac-${{ env.VERSION }}.sha256
+          sha256sum markcli-windows-${{ env.VERSION }}.exe > markcli-windows-${{ env.VERSION }}.exe.sha256
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          files: |
+            dist/markcli-linux-${{ env.VERSION }}
+            dist/markcli-mac-${{ env.VERSION }}
+            dist/markcli-windows-${{ env.VERSION }}.exe
+            dist/markcli-linux-${{ env.VERSION }}.sha256
+            dist/markcli-mac-${{ env.VERSION }}.sha256
+            dist/markcli-windows-${{ env.VERSION }}.exe.sha256
           draft: false
           prerelease: false
-
-      - name: Upload Linux executable
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/markcli-linux
-          asset_name: markcli-linux
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS executable
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/markcli-mac
-          asset_name: markcli-mac
-          asset_content_type: application/octet-stream
-
-      - name: Upload Windows executable
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/markcli.exe
-          asset_name: markcli.exe
-          asset_content_type: application/octet-stream
+          generate_release_notes: true
