@@ -11,12 +11,6 @@ var sitesCmd = &cobra.Command{
 	Use:   "sites",
 	Short: "Manage Atlassian sites",
 	Long:  "List, set default, and manage Atlassian site configurations",
-}
-
-var listSitesCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List configured Atlassian sites",
-	Long:  "List all configured Atlassian sites and show the default site",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sites, err := config.ListAtlassianSites()
 		if err != nil {
@@ -56,6 +50,5 @@ var setDefaultSiteCmd = &cobra.Command{
 }
 
 func init() {
-	sitesCmd.AddCommand(listSitesCmd)
 	sitesCmd.AddCommand(setDefaultSiteCmd)
 }

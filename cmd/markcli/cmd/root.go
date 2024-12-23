@@ -14,8 +14,16 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "markcli",
 	Short: "A CLI tool for managing markdown content",
-	Long: `markcli is a CLI tool for managing markdown content across different platforms.
-Currently supports Atlassian Confluence and Notion.`,
+	Long: `markcli is a powerful CLI tool for managing markdown content across different platforms.
+	
+Currently supported platforms:
+  - Atlassian (Confluence and Jira)
+    * List and search Confluence spaces and pages
+    * Manage Jira projects and issues
+    * Support for multiple Atlassian sites
+
+Use "markcli [command] --help" to learn more about each command.
+Enable debug mode with --debug flag for detailed logging.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		debug, _ := cmd.Flags().GetBool("debug")
 		if debug {
