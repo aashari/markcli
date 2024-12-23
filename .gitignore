@@ -1,0 +1,86 @@
+# Binaries and build artifacts
+/markcli
+/markcli-linux
+/markcli-mac
+/markcli.exe
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/dist/
+/build/
+
+# Release artifacts
+*.tar.gz
+*.zip
+*.sha256
+*.asc
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# Go workspace file
+go.work
+go.work.sum
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Cursor specific files
+.cursorrules
+.cursorignore
+.cursor/
+.cursor-test/
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific files
+/.config/
+/dist/
+/tmp/
+/debug/
+
+# Local development files
+.env
+.env.local
+*.log
+debug.log
+npm-debug.log*
+
+# Configuration files that might contain sensitive information
+config.json
+config.local.json
+.markcli.json
+
+# Dependency directories
+/vendor/
+
+# Generated documentation
+/docs/_site/
+/docs/api/
+
+# Test cache
+.testcache/
+
+# Output files
+repomix-*.txt
+DEVELOPMENT.md
+
+# GitHub Actions
+.github/.release
