@@ -2,6 +2,103 @@
 
 A command-line tool for managing markdown content across different platforms. Currently supports Atlassian Confluence and Jira.
 
+## Support
+
+Currently markcli supports the following OSes:
+
+* macOS
+  * 64bit (amd64)
+  * Arm (Apple Silicon)
+* Linux
+  * 64bit (amd64)
+  * Arm64
+* Windows
+  * 64bit (amd64)
+
+## Installation
+
+### Automatic
+
+#### Using Homebrew (macOS and Linux)
+
+```bash
+brew install aashari/tap/markcli
+```
+
+### Manual
+
+1. Check out markcli into any path (here is `${HOME}/.markcli`)
+
+```bash
+git clone --depth=1 https://github.com/aashari/markcli.git ~/.markcli
+```
+
+2. Add `~/.markcli/bin` to your `$PATH` any way you like
+
+For bash:
+```bash
+echo 'export PATH="$HOME/.markcli/bin:$PATH"' >> ~/.bash_profile
+```
+
+For zsh:
+```bash
+echo 'export PATH="$HOME/.markcli/bin:$PATH"' >> ~/.zprofile
+```
+
+For fish:
+```bash
+set -Ux fish_user_paths $HOME/.markcli/bin $fish_user_paths
+```
+
+**Alternative**: You can make symlinks into a directory that is already in your `$PATH` (e.g. `/usr/local/bin`) *OSX/Linux Only!*
+
+```bash
+# For macOS and Linux users
+sudo ln -s ~/.markcli/markcli /usr/local/bin/markcli
+
+# For Ubuntu/Debian users (local user installation)
+mkdir -p ~/.local/bin
+ln -s ~/.markcli/markcli ~/.local/bin/markcli
+. ~/.profile
+```
+
+### Binary Download
+
+1. Download the latest version from the [releases page](https://github.com/aashari/markcli/releases) for your platform:
+   - `markcli-linux` for Linux
+   - `markcli-mac` for macOS
+   - `markcli.exe` for Windows
+
+2. Make it executable (Linux/macOS):
+```bash
+chmod +x ./markcli-*
+```
+
+3. Move to a directory in your `$PATH`:
+
+Linux/macOS:
+```bash
+# System-wide installation (requires sudo)
+sudo mv markcli-* /usr/local/bin/markcli
+
+# Or, user-local installation
+mkdir -p ~/.local/bin
+mv markcli-* ~/.local/bin/markcli
+```
+
+Windows:
+- Rename the downloaded file to `markcli.exe`
+- Move it to a directory in your system's PATH (e.g., `C:\Windows`)
+- Or add its location to your PATH environment variable
+
+### Verify Installation
+
+After installation, verify that markcli is properly installed:
+
+```bash
+markcli --version
+```
+
 ## Quick Start
 
 1.  **Prerequisites**
@@ -9,39 +106,7 @@ A command-line tool for managing markdown content across different platforms. Cu
     *   Git
     *   Atlassian account with API token ([How to get an API token](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens/))
 
-2.  **Installation**
-
-    Choose one of the following installation methods:
-
-    **Option 1: Download Pre-built Binary (Recommended)**
-    
-    1. Navigate to the [releases page](https://github.com/andifg/markcli/releases) and download the appropriate executable for your operating system:
-       - `markcli-linux` for Linux
-       - `markcli-mac` for macOS
-       - `markcli.exe` for Windows
-
-    2. For Linux & macOS:
-       ```bash
-       # Make the downloaded file executable
-       chmod +x markcli-linux  # or markcli-mac for macOS
-       
-       # Move to a directory in your PATH
-       sudo mv markcli-linux /usr/local/bin/markcli  # or markcli-mac for macOS
-       ```
-
-    3. For Windows:
-       - Rename the downloaded file to `markcli.exe` if needed
-       - Move it to a directory in your system's PATH (e.g., `C:\Windows`)
-       - Or add its location to your PATH environment variable
-
-    **Option 2: Build from Source**
-    ```bash
-    git clone https://github.com/andifg/markcli.git
-    cd markcli
-    go build ./cmd/markcli
-    ```
-
-3.  **Configuration**
+2.  **Configuration**
 
     `markcli` stores its configuration in `~/.config/markcli/config.json`. You can add new configurations using the `config add` command. For example:
 
@@ -67,150 +132,134 @@ A command-line tool for managing markdown content across different platforms. Cu
     }
     ```
 
-## Development
+## Command Reference
 
-For detailed development instructions, see [DEVELOPMENT.md](DEVELOPMENT.md).
+### Global Flags
+- `--debug`: Enable debug mode for detailed logging
 
-Quick development workflow:
-
+### Configuration Commands
 ```bash
-# Run without building
-go run cmd/markcli/main.go [command]
+# Add a new configuration
+markcli config add [platform]     # Currently supports: atlassian
 
-# Run tests
-go test ./...
+# List all configurations
+markcli config list
 
-# Build for development
-go build ./cmd/markcli
+# Remove a configuration
+markcli config remove [platform] [site-name]
 ```
 
-## Documentation
+### Atlassian Commands
 
--   [DEVELOPMENT.md](DEVELOPMENT.md) - Comprehensive development guide
--   [COMMAND.md](COMMAND.md) - Complete command reference (Coming Soon)
+#### Site Management
+```bash
+# List all configured sites
+markcli atlassian sites list
+
+# Set default site
+markcli atlassian sites set-default [site-name]
+```
+
+#### Confluence Commands
+
+1. **List Spaces**
+   ```bash
+   # List all spaces
+   markcli atlassian confluence spaces
+   
+   # Include personal and archived spaces
+   markcli atlassian confluence spaces --all
+   
+   # Use specific site
+   markcli atlassian confluence spaces --site "your-site"
+   ```
+
+2. **Search Pages**
+   ```bash
+   # Basic search
+   markcli atlassian confluence pages search --query "your search query"
+   
+   # Search in specific space with pagination
+   markcli atlassian confluence pages search \
+     --query "your search query" \
+     --space "SPACE_KEY" \
+     --limit 20 \
+     --page 2
+   ```
+
+3. **Get Page Content**
+   ```bash
+   # Get specific page by ID
+   markcli atlassian confluence pages get --id "page-id"
+   ```
+
+#### Jira Commands
+
+1. **List Projects**
+   ```bash
+   # List all projects
+   markcli atlassian jira projects
+   
+   # Sort projects by name
+   markcli atlassian jira projects --sort name
+   
+   # Available sort options: key, name, type, style
+   ```
+
+2. **Search Issues**
+   ```bash
+   # Basic search
+   markcli atlassian jira issues search --query "high priority"
+   
+   # Search with project filter and pagination
+   markcli atlassian jira issues search \
+     --query "high priority" \
+     --project "PROJ" \
+     --limit 20 \
+     --page 2
+   ```
+
+3. **Get Issue Details**
+   ```bash
+   # Get specific issue
+   markcli atlassian jira issues get --id "PROJ-123"
+   ```
+
+### Common Options
+
+All Atlassian commands accept these common flags:
+- `--site`: Specify which Atlassian site configuration to use (defaults to the default site)
+- `--debug`: Enable debug output for troubleshooting
+
+### Search Command Options
+
+All search commands (Confluence pages, Jira issues) support:
+- `--query, -q`: Search query (required)
+- `--limit, -l`: Results per page (default: 10)
+- `--page, -p`: Page number (default: 1)
 
 ## Features
 
 *   **Atlassian Confluence Support:**
-    *   List Confluence spaces with filtering options.
-    *   Search Confluence pages using CQL (Confluence Query Language).
-    *   Get the content of a specific Confluence page by its ID.
+    *   List Confluence spaces with filtering options
+    *   Search Confluence pages using CQL (Confluence Query Language)
+    *   Get the content of a specific Confluence page by its ID
 
 *   **Atlassian Jira Support:**
-    *   List Jira projects.
-    *   Search Jira issues using a text query, with optional project filtering.
-    *   Get the details of a specific Jira issue by its ID.
+    *   List Jira projects with sorting options
+    *   Search Jira issues using text queries and project filters
+    *   Get detailed information about specific Jira issues
 
 *   **Atlassian Site Management:**
-    *   Manage configurations for multiple Atlassian sites.
-    *   Set a default Atlassian site.
+    *   Manage configurations for multiple Atlassian sites
+    *   Set and use default Atlassian site
+    *   Easy switching between different sites
 
 *   **Common Features:**
-    *   Consistent markdown output across all supported platforms.
-    *   Support for pagination when listing spaces or searching pages/issues.
-    *   Robust error handling and informative error messages.
-    *   Debug logging is available using the `--debug` flag.
-
-## Basic Usage
-
-1.  **List Confluence Spaces**
-
-    ```bash
-    markcli atlassian confluence spaces
-    ```
-
-    You can also list all spaces including personal and archived spaces by using the following command
-
-    ```bash
-    markcli atlassian confluence spaces -a
-    ```
-
-2.  **Search Confluence Pages**
-
-    ```bash
-    markcli atlassian confluence pages search --query "your search query" --space "space key"
-    ```
-
-    Replace `your search query` with your query and `space key` with the space in which you want to search.
-
-3.  **Get Confluence Page Content**
-
-    ```bash
-    markcli atlassian confluence pages get --id <page-id>
-    ```
-
-    Replace `<page-id>` with the ID of the page you want to retrieve.
-
-4. **List Jira Projects**
-
-   ```bash
-   markcli atlassian jira projects
-    ```
-You can sort the output using `--sort` flag, for example use `--sort name` to sort by name, or `--sort type` to sort by project type.
-
-   ```bash
-  markcli atlassian jira projects --sort name
-   ```
-
-5.  **Search Jira Issues**
-
-   ```bash
-   markcli atlassian jira issues search --query "your text query"
-   ```
-
-    Replace `"your text query"` with your search term.
-
-   You can also filter the search by a project key:
-   ```bash
-  markcli atlassian jira issues search --query "your text query" -r <project key>
-   ```
-    Use `-r` flag to filter the search in a project using its `project key`.
-
-   You can specify pagination using `--page` and `--limit`:
-
-   ```bash
-   markcli atlassian jira issues search -q "your text query" -l 20 -p 2
-   ```
-    Use `-l` to limit the number of records to show, and `-p` to go to a specific page.
-
-6.  **Get Jira Issue Details**
-    ```bash
-    markcli atlassian jira issues get --id <issue-id>
-    ```
-    Replace `<issue-id>` with the ID of the Jira issue you want to retrieve.
-
-**Common Options**
-
-*  All commands accept a `--site` parameter to specify which Atlassian site configuration to use. If not provided, the tool will try to use the default site.
-   ```bash
-  markcli atlassian jira projects  --site="your-site-name"
-  ```
-
-*  All commands also accepts a `--debug` flag which can be useful for debugging.
-
-**Configuration Examples**
-
-* To add a new Atlassian configuration:
- ```bash
- markcli config add atlassian
- ```
-* To list all available configurations:
- ```bash
-  markcli config list
- ```
-* To remove a configuration:
-```bash
-  markcli config remove atlassian <site-name>
-```
-
-* Set the default Atlassian site:
-```bash
-  markcli atlassian sites set-default <site-name>
-```
-* List Atlassian sites:
- ```bash
-   markcli atlassian sites list
- ```
+    *   Consistent markdown output across all supported platforms
+    *   Support for pagination in list and search operations
+    *   Robust error handling and informative error messages
+    *   Debug logging for troubleshooting
 
 ## Contributing
 
