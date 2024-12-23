@@ -7,6 +7,7 @@ import (
 	formatting "markcli/internal/formatting/atlassian"
 	"markcli/internal/logging"
 	types "markcli/internal/types/atlassian"
+	"markcli/internal/util"
 	"net/http"
 
 	"github.com/spf13/cobra"
@@ -99,7 +100,7 @@ Examples:
 		// Add pagination info
 		output += fmt.Sprintf("\nShowing %d-%d of %d issues\n",
 			startAt+1,
-			min(startAt+len(results.Issues), results.Total),
+			util.Min(startAt+len(results.Issues), results.Total),
 			results.Total,
 		)
 
@@ -116,11 +117,4 @@ func init() {
 	searchCmd.Flags().IntP("page", "p", 1, "Page number")
 	searchCmd.Flags().String("site", "", "Atlassian site to use (defaults to the default site)")
 	searchCmd.MarkFlagRequired("query")
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

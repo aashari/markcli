@@ -49,14 +49,17 @@ func (c *Client) AtlassianJiraListProjects() ([]atlassian.AtlassianJiraProject, 
 		var errorResp atlassian.AtlassianJiraError
 		if err := json.Unmarshal(body, &errorResp); err == nil {
 			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Jira API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
 			return nil, &errorResp
 		}
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		logging.LogDebug("Jira API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var projects []atlassian.AtlassianJiraProject
 	if err := json.Unmarshal(body, &projects); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -108,14 +111,17 @@ func (c *Client) AtlassianJiraSearchIssues(opts atlassian.AtlassianJiraSearchOpt
 		var errorResp atlassian.AtlassianJiraError
 		if err := json.Unmarshal(body, &errorResp); err == nil {
 			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Jira API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
 			return nil, &errorResp
 		}
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		logging.LogDebug("Jira API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var result atlassian.AtlassianJiraSearchResponse
 	if err := json.Unmarshal(body, &result); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -164,14 +170,17 @@ func (c *Client) AtlassianJiraGetIssue(issueID string) (*atlassian.AtlassianJira
 		var errorResp atlassian.AtlassianJiraError
 		if err := json.Unmarshal(body, &errorResp); err == nil {
 			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Jira API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
 			return nil, &errorResp
 		}
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		logging.LogDebug("Jira API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var issue atlassian.AtlassianJiraIssue
 	if err := json.Unmarshal(body, &issue); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -216,14 +225,17 @@ func (c *Client) AtlassianJiraGetIssueComments(issueID string) (*atlassian.Atlas
 		var errorResp atlassian.AtlassianJiraError
 		if err := json.Unmarshal(body, &errorResp); err == nil {
 			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Jira API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
 			return nil, &errorResp
 		}
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		logging.LogDebug("Jira API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var result atlassian.AtlassianJiraCommentsResponse
 	if err := json.Unmarshal(body, &result); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 

@@ -8,6 +8,7 @@ import (
 
 	"markcli/internal/logging"
 	"markcli/internal/types/atlassian"
+	"markcli/internal/util"
 )
 
 // AtlassianConfluenceSpaceTableFormatter formats Confluence spaces as a markdown table
@@ -120,7 +121,7 @@ func (f *AtlassianConfluenceSearchResultsFormatter) AtlassianConfluenceFormatSea
 			description = "(No description available)"
 		}
 
-		description = AtlassianConfluenceTruncateText(description, 1500)
+		description = util.TruncateText(description, 1500)
 		description = AtlassianConfluenceWrapText(description, 100)
 		md.WriteString(description)
 		md.WriteString("\n")
@@ -239,33 +240,25 @@ func AtlassianConfluenceCleanContent(content string) string {
 	return strings.TrimSpace(result)
 }
 
-// AtlassianConfluenceTruncateText truncates text to the specified length, adding ellipsis if needed
-func AtlassianConfluenceTruncateText(text string, maxLength int) string {
-	text = strings.TrimSpace(text)
-	if len(text) <= maxLength {
+// AtlassianConfluenceWrapText wraps text at the specified line length
+func AtlassianConfluenceWrapText(text string, lineLength int) string {
+	words := strings.Fields(text)
+	if len(words) == 0 {
 		return text
 	}
-	return text[:maxLength-3] + "..."
-}
 
-// AtlassianConfluenceWrapText wraps text at word boundaries to the specified line length
-func AtlassianConfluenceWrapText(text string, lineLength int) string {
-	var wrapped strings.Builder
-	words := strings.Fields(text)
-	lineLen := 0
+	var lines []string
+	currentLine := words[0]
 
-	for i, word := range words {
-		wordLen := len(word)
-		if lineLen+wordLen+1 > lineLength && lineLen > 0 {
-			wrapped.WriteString("\n")
-			lineLen = 0
-		} else if i > 0 {
-			wrapped.WriteString(" ")
-			lineLen++
+	for _, word := range words[1:] {
+		if len(currentLine)+1+len(word) <= lineLength {
+			currentLine += " " + word
+		} else {
+			lines = append(lines, currentLine)
+			currentLine = word
 		}
-		wrapped.WriteString(word)
-		lineLen += wordLen
 	}
+	lines = append(lines, currentLine)
 
-	return wrapped.String()
+	return strings.Join(lines, "\n")
 }

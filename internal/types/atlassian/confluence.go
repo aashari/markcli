@@ -1,6 +1,7 @@
 package atlassian
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -206,4 +207,29 @@ type AtlassianConfluencePageDetails struct {
 		WebUI string `json:"webui"`
 	} `json:"_links"`
 	Comments *AtlassianConfluenceFooterCommentsResponse `json:"comments,omitempty"`
+}
+
+// AtlassianConfluenceError represents an error response from the Confluence API
+type AtlassianConfluenceError struct {
+	StatusCode   int    `json:"-"`
+	Message      string `json:"message"`
+	Reason       string `json:"reason"`
+	ErrorMessage string `json:"error,omitempty"`
+	ErrorDetails string `json:"error_description,omitempty"`
+	Context      string `json:"context,omitempty"`
+	Status       int    `json:"status,omitempty"`
+}
+
+// Error implements the error interface
+func (e *AtlassianConfluenceError) Error() string {
+	if e.Message != "" {
+		return fmt.Sprintf("Confluence API error: %s", e.Message)
+	}
+	if e.ErrorMessage != "" {
+		return fmt.Sprintf("Confluence API error: %s - %s", e.ErrorMessage, e.ErrorDetails)
+	}
+	if e.Reason != "" {
+		return fmt.Sprintf("Confluence API error: %s", e.Reason)
+	}
+	return fmt.Sprintf("Confluence API error: status code %d", e.StatusCode)
 }

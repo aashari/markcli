@@ -7,6 +7,7 @@ import (
 	"markcli/internal/config"
 	formatting "markcli/internal/formatting/atlassian"
 	types "markcli/internal/types/atlassian"
+	"markcli/internal/util"
 
 	"github.com/spf13/cobra"
 )
@@ -77,7 +78,7 @@ func search(cmd *cobra.Command, args []string) error {
 	output = fmt.Sprintf("%s\n\nShowing results %d-%d of %d (Page %d of %d)\n",
 		output,
 		startAt+1,
-		min(startAt+results.Size, results.TotalSize),
+		util.Min(startAt+results.Size, results.TotalSize),
 		results.TotalSize,
 		page,
 		totalPages,
@@ -85,11 +86,4 @@ func search(cmd *cobra.Command, args []string) error {
 
 	fmt.Print(output)
 	return nil
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

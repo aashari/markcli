@@ -59,12 +59,20 @@ func (c *Client) AtlassianConfluenceSearchPages(opts atlassian.AtlassianConfluen
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		var errorResp atlassian.AtlassianConfluenceError
+		if err := json.Unmarshal(body, &errorResp); err == nil {
+			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Confluence API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
+			return nil, &errorResp
+		}
+		logging.LogDebug("Confluence API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var result atlassian.AtlassianConfluenceSearchResponse
 	if err := json.Unmarshal(body, &result); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -94,16 +102,42 @@ func (c *Client) AtlassianConfluenceListSpaces(includeAll bool) ([]atlassian.Atl
 	}
 	defer resp.Body.Close()
 
+	// Read response body for logging
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Log request and response for debugging
+	logging.LogDebug("Request URL: %s", req.URL.String())
+	logging.LogDebug("Response Status: %s", resp.Status)
+	if logging.IsDebugEnabled() {
+		var jsonData interface{}
+		if err := json.Unmarshal(body, &jsonData); err == nil {
+			logging.LogJSONInline("Response Body", jsonData)
+		} else {
+			logging.LogDebug("Response Body: %s", string(body))
+		}
+	}
+
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		var errorResp atlassian.AtlassianConfluenceError
+		if err := json.Unmarshal(body, &errorResp); err == nil {
+			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Confluence API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
+			return nil, &errorResp
+		}
+		logging.LogDebug("Confluence API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var result struct {
 		Results []atlassian.AtlassianConfluenceSpace `json:"results"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal(body, &result); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -160,12 +194,20 @@ func (c *Client) AtlassianConfluenceGetPage(pageID string) (*atlassian.Atlassian
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
+		var errorResp atlassian.AtlassianConfluenceError
+		if err := json.Unmarshal(body, &errorResp); err == nil {
+			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Confluence API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
+			return nil, &errorResp
+		}
+		logging.LogDebug("Confluence API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
 		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var result atlassian.AtlassianConfluencePageDetails
 	if err := json.Unmarshal(body, &result); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -227,17 +269,26 @@ func (c *Client) AtlassianConfluenceGetPageFooterComments(pageID string) (*atlas
 	// Check response status
 	if resp.StatusCode == http.StatusNotFound {
 		// Return empty response for 404 errors
+		logging.LogDebug("Confluence API - No comments found for page %s", pageID)
 		return &atlassian.AtlassianConfluenceFooterCommentsResponse{
 			Results: []atlassian.AtlassianConfluenceFooterComment{},
 		}, nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		var errorResp atlassian.AtlassianConfluenceError
+		if err := json.Unmarshal(body, &errorResp); err == nil {
+			errorResp.StatusCode = resp.StatusCode
+			logging.LogDebug("Confluence API Error - Status Code: %d, Error: %+v", resp.StatusCode, errorResp)
+			return nil, &errorResp
+		}
+		logging.LogDebug("Confluence API Error - Status Code: %d, Body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var result atlassian.AtlassianConfluenceFooterCommentsResponse
 	if err := json.Unmarshal(body, &result); err != nil {
+		logging.LogDebug("Failed to decode response: %s", string(body))
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 

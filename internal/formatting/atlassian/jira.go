@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"text/tabwriter"
-	"time"
 
 	"markcli/internal/types/atlassian"
+	"markcli/internal/util"
 )
 
 // AtlassianJiraProjectTableFormatter formats Jira projects as a markdown table
@@ -73,7 +73,7 @@ func (f *AtlassianJiraProjectTableFormatter) AtlassianJiraFormatProjectsAsMarkdo
 
 	// Write rows
 	for _, project := range f.projects {
-		name := truncateText(project.Name, 50)
+		name := util.TruncateText(project.Name, 50)
 		fmt.Fprintf(w, "| %s | %s | %s | %s |\n",
 			project.Key,
 			name,
@@ -113,23 +113,7 @@ func (f *AtlassianJiraSearchResultsFormatter) AtlassianJiraFormatSearchResultsAs
 
 		// Add last modified date
 		if issue.Fields.Updated != "" {
-			// Try different date formats
-			layouts := []string{
-				"2006-01-02T15:04:05.999-0700",
-				"2006-01-02T15:04:05.999+0700",
-				time.RFC3339,
-				"2006-01-02T15:04:05Z",
-			}
-
-			var t time.Time
-			var err error
-			for _, layout := range layouts {
-				t, err = time.Parse(layout, issue.Fields.Updated)
-				if err == nil {
-					break
-				}
-			}
-
+			t, err := util.ParseDate(issue.Fields.Updated)
 			if err == nil {
 				output.WriteString(fmt.Sprintf("Last Modified: %s\n", t.Format("Jan 02, 2006")))
 			} else {
@@ -152,10 +136,7 @@ func (f *AtlassianJiraSearchResultsFormatter) AtlassianJiraFormatSearchResultsAs
 				Version: issue.Fields.Description.Version,
 			}
 			if desc, err := doc.AtlassianDocumentConvertToMarkdown(); err == nil {
-				// Truncate description to first 300 characters
-				if len(desc) > 300 {
-					desc = desc[:300] + "..."
-				}
+				desc = util.TruncateText(desc, 300)
 				output.WriteString(desc)
 			}
 			output.WriteString("\n")
@@ -191,40 +172,20 @@ func (f *AtlassianJiraIssueDetailsFormatter) AtlassianJiraFormatIssueDetailsAsMa
 		output.WriteString(fmt.Sprintf("- **Reporter**: %s\n", issue.Fields.Reporter.DisplayName))
 	}
 
-	// Try different date formats for Created and Updated
-	layouts := []string{
-		"2006-01-02T15:04:05.999-0700",
-		"2006-01-02T15:04:05.999+0700",
-		time.RFC3339,
-		"2006-01-02T15:04:05Z",
-	}
-
 	if issue.Fields.Created != "" {
-		var t time.Time
-		var err error
-		for _, layout := range layouts {
-			t, err = time.Parse(layout, issue.Fields.Created)
-			if err == nil {
-				output.WriteString(fmt.Sprintf("- **Created**: %s\n", t.Format("Jan 02, 2006 15:04:05")))
-				break
-			}
-		}
-		if err != nil {
+		t, err := util.ParseDate(issue.Fields.Created)
+		if err == nil {
+			output.WriteString(fmt.Sprintf("- **Created**: %s\n", t.Format("Jan 02, 2006 15:04:05")))
+		} else {
 			output.WriteString(fmt.Sprintf("- **Created**: %s\n", issue.Fields.Created))
 		}
 	}
 
 	if issue.Fields.Updated != "" {
-		var t time.Time
-		var err error
-		for _, layout := range layouts {
-			t, err = time.Parse(layout, issue.Fields.Updated)
-			if err == nil {
-				output.WriteString(fmt.Sprintf("- **Last Modified**: %s\n", t.Format("Jan 02, 2006 15:04:05")))
-				break
-			}
-		}
-		if err != nil {
+		t, err := util.ParseDate(issue.Fields.Updated)
+		if err == nil {
+			output.WriteString(fmt.Sprintf("- **Last Modified**: %s\n", t.Format("Jan 02, 2006 15:04:05")))
+		} else {
 			output.WriteString(fmt.Sprintf("- **Last Modified**: %s\n", issue.Fields.Updated))
 		}
 	}
@@ -249,6 +210,7 @@ func (f *AtlassianJiraIssueDetailsFormatter) AtlassianJiraFormatIssueDetailsAsMa
 			Version: issue.Fields.Description.Version,
 		}
 		if desc, err := doc.AtlassianDocumentConvertToMarkdown(); err == nil {
+			output.WriteString("## Description\n\n")
 			output.WriteString(desc)
 			output.WriteString("\n\n")
 		}
@@ -256,50 +218,38 @@ func (f *AtlassianJiraIssueDetailsFormatter) AtlassianJiraFormatIssueDetailsAsMa
 
 	// Comments
 	if f.comments != nil && len(f.comments.Comments) > 0 {
-		output.WriteString("**Comments**\n\n")
+		output.WriteString("## Comments\n\n")
 		for _, comment := range f.comments.Comments {
-			// Parse comment date
-			var commentDate string
-			for _, layout := range layouts {
-				if t, err := time.Parse(layout, comment.Created); err == nil {
-					commentDate = t.Format("Jan 02, 2006 15:04:05")
-					break
+			if comment.Author != nil {
+				output.WriteString(fmt.Sprintf("**%s** ", comment.Author.DisplayName))
+			}
+			if comment.Created != "" {
+				t, err := util.ParseDate(comment.Created)
+				if err == nil {
+					output.WriteString(fmt.Sprintf("on %s", t.Format("Jan 02, 2006 15:04:05")))
+				} else {
+					output.WriteString(fmt.Sprintf("on %s", comment.Created))
 				}
 			}
-			if commentDate == "" {
-				commentDate = comment.Created
-			}
+			output.WriteString("\n\n")
 
-			// Add comment header
-			if comment.Author != nil {
-				output.WriteString(fmt.Sprintf("**%s** - %s\n\n", comment.Author.DisplayName, commentDate))
-			}
-
-			// Add comment content
-			if comment.Body != nil && len(comment.Body.Content) > 0 {
+			if comment.Body != nil {
 				doc := &atlassian.AtlassianDocument{
 					Type:    "doc",
 					Content: comment.Body.Content,
 					Version: comment.Body.Version,
 				}
-				if content, err := doc.AtlassianDocumentConvertToMarkdown(); err == nil {
-					output.WriteString(content)
+				if body, err := doc.AtlassianDocumentConvertToMarkdown(); err == nil {
+					output.WriteString(body)
 					output.WriteString("\n\n")
 				}
 			}
 
 			output.WriteString("---\n\n")
 		}
+	} else {
+		output.WriteString("## Comments\n\nNo comments found\n")
 	}
 
 	return output.String()
-}
-
-// truncateText truncates text to the specified length, adding ellipsis if needed
-func truncateText(text string, maxLength int) string {
-	text = strings.TrimSpace(text)
-	if len(text) <= maxLength {
-		return text
-	}
-	return text[:maxLength-3] + "..."
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"markcli/internal/logging"
 	"net/http"
 )
 
@@ -39,6 +40,7 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 			return nil, fmt.Errorf("failed to marshal request body: %w", err)
 		}
 		buf = bytes.NewBuffer(jsonBody)
+		logging.LogDebug("Request Body: %s", string(jsonBody))
 	}
 
 	// Create request
